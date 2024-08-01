@@ -1,0 +1,35 @@
+.cancel-btn {
+    padding: 15px;
+    border-radius: 5px;
+    background-color: rgb(255, 255, 255);
+    color: rgb(37, 37, 37);
+  }
+  .delete-btn{
+    padding: 15px;
+    border-radius: 5px;
+    background-color: rgb(252, 47, 47);
+    color: rgb(37, 37, 37);
+  }
+
+  .confirm-div{
+    padding: 10px;
+  }
+
+  .mat-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px; 
+    padding: 16px;
+    border-top: 1px solid #e0e0e0; 
+  }
+  
+  .delete-btn:hover {
+    background-color: rgb(37, 37, 37); 
+    color: rgb(255, 255, 255);
+  }
+  
+  .cancel-btn:hover {
+    background-color: rgb(37, 37, 37); 
+    color: rgb(255, 255, 255);
+  }
+  

@@ -1,0 +1,93 @@
+.form-row {
+    display: flex;
+    /* align-items: center; */
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .dob{
+    width: 50%;
+  }
+  
+  mat-form-field {
+    flex: 1;
+    margin-right: 20px;
+  }
+  .experience{
+    display: flex;
+    width: 50%;
+  }
+  .pay{
+    width: 100%;
+  }
+  
+  .present{
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 14%;
+    margin-top: -30px;
+  }
+  .changeState{
+    display: flex;
+    justify-content: flex-start;
+    margin-top: -29px;
+    margin-left: -10px;
+  }
+  
+  input[type="file"] {
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    gap: 10px;
+    /* margin-left: 10px; */
+  }
+
+  .cancel-btn {
+    padding: 15px;
+    border-radius: 5px;
+    background-color: rgb(255, 255, 255);
+    color: rgb(37, 37, 37);
+  }
+  .save-btn{
+    padding: 15px;
+    border-radius: 5px;
+    background-color: rgb(37, 35, 35);
+    color: white;
+  }
+
+  .hourly-field mat-icon{
+    background-color: #F0F1F3;
+  }
+
+  .file-upload-area {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .file-upload-area mat-icon{
+    color: black;
+  }
+
+  .error-message{
+    color: red;
+  }
+  .title{
+    display: flex;
+    padding: 20px;
+    align-items: center;
+    gap: 15px;
+    font-size: 25px;
+  }
+  .plus{
+    font-size: 35px;
+  }
+.fileButton{
+  margin-right: 5px !important;
+  border-radius: none !important;
+}

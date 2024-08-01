@@ -1,0 +1,10 @@
+<div class="success-dialog-container">
+  <mat-dialog-content class="success-dialog-content">
+    <div class="success-icon">✔️</div>
+    <h2 class="success-title">Success!</h2>
+    <p class="success-message">{{ data.message }}</p>
+  </mat-dialog-content>
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="onClose()" class="close-btn">OK</button>
+  </mat-dialog-actions>
+</div>

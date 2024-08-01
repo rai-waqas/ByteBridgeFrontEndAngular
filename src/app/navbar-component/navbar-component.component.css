@@ -1,0 +1,11 @@
+.navbar{
+    border: 1px solid #c0bebe;
+    display: flex;
+}
+.menu-trigger-right {
+    margin-left: auto;
+}
+.matMenu{
+    display: flex;
+    float: right;
+}
