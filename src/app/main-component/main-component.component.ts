@@ -87,8 +87,9 @@ export class MainComponentComponent implements AfterViewInit {
   }
   openDialog(): void {
       const dialogRef = this.dialog.open(DetailsDialogComponent, {
-        width: '900px',
-        position: { right: '0' },
+        width: '60%',
+        height: '100%',
+        position: { right: '0', top: '25px', bottom: '25px' },
         panelClass: 'right-slide-dialog',
       });
   
@@ -162,9 +163,10 @@ export class MainComponentComponent implements AfterViewInit {
 
     openEditDialog(clientDetail: DocumentData): void {
       const dialogRef = this.dialog.open(DetailsDialogComponent, {
-          width: '900px',
-          position: { right: '0' },
-          panelClass: 'right-slide-dialog',
+        width: '60%',
+        height: '100%',
+        position: { right: '0', top: '25px', bottom: '25px' },
+        panelClass: 'right-slide-dialog',
           data: {
             clientDetail,
             isEditClicked: !!clientDetail

@@ -27,14 +27,14 @@ interface ClientDetails {
   payValue: number;
   payType: string;
   gender: string;
-  id?: number; // Optional property for calling update 
+  id?: number; // Optional property for calling update
   files?: File[];
 }
 
 @Component({
   selector: 'app-details-dialog',
   templateUrl: './details-dialog.component.html',
-  styleUrls: ['./details-dialog.component.css']
+  styleUrls: ['./details-dialog.component.css'],
 })
 export class DetailsDialogComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
@@ -55,21 +55,25 @@ export class DetailsDialogComponent implements OnInit {
   today: Date;
 
   constructor(
-    private dialogService: DialogService, 
-    private dialog: MatDialog, 
+    private dialogService: DialogService,
+    private dialog: MatDialog,
     private fileService: FileService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    this.isEditClicked = data?.isEditClicked ?? false;;
+    this.isEditClicked = data?.isEditClicked ?? false;
     this.clientDetails = data?.clientDetail ?? {};
     this.today = new Date();
     this.today.setDate(this.today.getDate() - 1);
-    if (this.isEditClicked){
+    if (this.isEditClicked) {
       if (data.clientDetail?.files) {
-        console.log('Inside Files')
+        console.log('Inside Files');
         this.files = data.clientDetail.files.map((file: Files) => ({
           ...file,
-          blob: this.convertBase64ToBlob(file.filedata, this.getFileContentType(file.filename), file.filename)
+          blob: this.convertBase64ToBlob(
+            file.filedata,
+            this.getFileContentType(file.filename),
+            file.filename
+          ),
         }));
         console.log('Client Details Now:', this.files);
       }
@@ -77,22 +81,44 @@ export class DetailsDialogComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.detailsForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      email: new FormControl('', [Validators.required, Validators.email, emailDotValidator()]),
-      client: new FormControl(this.clients[0]?.id, Validators.required),
-      state: new FormControl([], Validators.required),
-      dob: new FormControl(null, [Validators.required, this.dateValidator.bind(this)]),
-      expStart: new FormControl(null, [Validators.required, this.dateValidator.bind(this)]),
-      expEnd: new FormControl(null, [Validators.required, this.dateValidator.bind(this)]),
-      hourlyRate: new FormControl({ value: null, disabled: this.isStateChanged }, [Validators.required, Validators.min(0)]),
-      percentage: new FormControl({ value: null, disabled: !this.isStateChanged }, [Validators.required, Validators.min(0), Validators.max(100)]),
-      yearsOfExperience: new FormControl({ value: '', disabled: true }),
-      gender: new FormControl('', Validators.required),
-      file: new FormControl([])
-    }, { validators: dateRangeValidator('dob', 'expStart') });
+    this.detailsForm = new FormGroup(
+      {
+        name: new FormControl('', Validators.required),
+        email: new FormControl('', [
+          Validators.required,
+          Validators.email,
+          emailDotValidator(),
+        ]),
+        client: new FormControl(this.clients[0]?.id, Validators.required),
+        state: new FormControl([], Validators.required),
+        dob: new FormControl(null, [
+          Validators.required,
+          this.dateValidator.bind(this),
+        ]),
+        expStart: new FormControl(null, [
+          Validators.required,
+          this.dateValidator.bind(this),
+        ]),
+        expEnd: new FormControl(null, [
+          Validators.required,
+          this.dateValidator.bind(this),
+        ]),
+        hourlyRate: new FormControl(
+          { value: null, disabled: this.isStateChanged },
+          [Validators.required, Validators.min(0)]
+        ),
+        percentage: new FormControl(
+          { value: null, disabled: !this.isStateChanged },
+          [Validators.required, Validators.min(0), Validators.max(100)]
+        ),
+        yearsOfExperience: new FormControl({ value: '', disabled: true }),
+        gender: new FormControl('', Validators.required),
+        file: new FormControl([]),
+      },
+      { validators: dateRangeValidator('dob', 'expStart') }
+    );
 
-    this.dialogService.getClients().subscribe(clients => {
+    this.dialogService.getClients().subscribe((clients) => {
       this.clients = clients;
       if (this.isEditClicked) {
         this.detailsForm.get('client')?.setValue(this.clientDetails?.clientId);
@@ -101,7 +127,7 @@ export class DetailsDialogComponent implements OnInit {
       }
     });
 
-    this.dialogService.getStates().subscribe(states => {
+    this.dialogService.getStates().subscribe((states) => {
       this.states = states;
       // console.log('States:', this.states);
       if (this.isEditClicked) {
@@ -110,18 +136,24 @@ export class DetailsDialogComponent implements OnInit {
         this.detailsForm.get('state')?.setValue([]);
       }
     });
-    
+
     if (this.isEditClicked) {
       this.setEditFormValues();
     }
-    
-    this.detailsForm.get('expStart')?.valueChanges.subscribe(() => this.validateExperienceDates());
-    this.detailsForm.get('expEnd')?.valueChanges.subscribe(() => this.validateExperienceDates());
 
-    this.detailsForm.get('expStart')?.valueChanges.subscribe(() => this.calculateExperience());
-    this.detailsForm.get('expEnd')?.valueChanges.subscribe(() => this.calculateExperience());
+    this.detailsForm
+      .get('expStart')
+      ?.valueChanges.subscribe(() => this.validateExperienceDates());
+    this.detailsForm
+      .get('expEnd')
+      ?.valueChanges.subscribe(() => this.validateExperienceDates());
 
-
+    this.detailsForm
+      .get('expStart')
+      ?.valueChanges.subscribe(() => this.calculateExperience());
+    this.detailsForm
+      .get('expEnd')
+      ?.valueChanges.subscribe(() => this.calculateExperience());
   }
 
   private setEditFormValues() {
@@ -138,12 +170,18 @@ export class DetailsDialogComponent implements OnInit {
         expStart: new Date(this.clientDetails.expStart),
         expEnd: new Date(this.clientDetails.expEnd),
         yearsOfExperience: this.clientDetails.yearsOfExperience,
-        hourlyRate: this.clientDetails.payType === 'hourly' ? this.clientDetails.payValue : null,
-        percentage: this.clientDetails.payType === 'percentage' ? this.clientDetails.payValue : null,
+        hourlyRate:
+          this.clientDetails.payType === 'hourly'
+            ? this.clientDetails.payValue
+            : null,
+        percentage:
+          this.clientDetails.payType === 'percentage'
+            ? this.clientDetails.payValue
+            : null,
         gender: this.clientDetails.gender,
         // file: this.clientDetails.files
       });
-      if (this.clientDetails.payType === 'hourly'){
+      if (this.clientDetails.payType === 'hourly') {
         this.detailsForm.get('percentage')?.disable();
       } else {
         this.detailsForm.get('hourlyRate')?.disable();
@@ -189,14 +227,15 @@ export class DetailsDialogComponent implements OnInit {
     }
   }
 
-  private dateValidator(control: FormControl): { [key: string]: boolean } | null {
+  private dateValidator(
+    control: FormControl
+  ): { [key: string]: boolean } | null {
     const value = control.value;
     if (value && new Date(value) > this.today) {
       return { invalidDate: true };
     }
     return null;
   }
-  
 
   private validateExperienceDates() {
     const expStart = new Date(this.detailsForm.get('expStart')?.value);
@@ -204,43 +243,44 @@ export class DetailsDialogComponent implements OnInit {
 
     if (expStart && expEnd) {
       if (expStart > expEnd) {
-        this.detailsForm.get('expEnd')?.setErrors({ invalidExperienceDates: true });
+        this.detailsForm
+          .get('expEnd')
+          ?.setErrors({ invalidExperienceDates: true });
       } else {
         this.detailsForm.get('expEnd')?.setErrors(null);
       }
     }
   }
 
-  
   private calculateExperience() {
     const expStart = this.detailsForm.get('expStart')?.value;
     const expEnd = this.detailsForm.get('expEnd')?.value;
-  
+
     if (expStart && expEnd) {
       const startDate = new Date(expStart);
       const endDate = new Date(expEnd);
-  
+
       let years = endDate.getFullYear() - startDate.getFullYear();
       let months = endDate.getMonth() - startDate.getMonth();
-  
+
       if (months < 0) {
         years--;
         months += 12;
       }
-  
+
       let experienceString = '';
-      
+
       if (years > 0) {
         experienceString += `${years} Year${years !== 1 ? 's' : ''} `;
       }
-      
+
       if (months > 0) {
         experienceString += `${months} Month${months !== 1 ? 's' : ''}`;
       }
-  
+
       experienceString = experienceString.trim();
       if (experienceString === '') {
-        this.detailsForm.get('yearsOfExperience')?.setValue("No Experience");
+        this.detailsForm.get('yearsOfExperience')?.setValue('No Experience');
       } else {
         this.detailsForm.get('yearsOfExperience')?.setValue(experienceString);
       }
@@ -251,81 +291,108 @@ export class DetailsDialogComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation(); // Prevents the click event from propagating to the parent div
     this.fileInput.nativeElement.click(); // Triggers the file input click
-  }  
+  }
 
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-        const fileArray = Array.from(input.files);
+      const fileArray = Array.from(input.files);
 
-        // Define acceptable formats and size limit
-        const allowedTypes = [
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'image/jpeg',
-            'image/jpg',
-            'image/png'
-        ];
-        const maxSizeMB = 5;
-        const maxSizeBytes = maxSizeMB * 1024 * 1024; // Convert MB to bytes
-        this.errorMessage = null;
-        this.errorMessages = []; 
+      // Define acceptable formats and size limit
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+      ];
+      const maxSizeMB = 5;
+      const maxSizeBytes = maxSizeMB * 1024 * 1024; // Convert MB to bytes
+      this.errorMessage = null;
+      this.errorMessages = [];
 
-        // Validate files
-        fileArray.forEach(file => {
-          if (!allowedTypes.includes(file.type)) {
-            this.errorMessages.push(`File "${file.name}" is invalid: Invalid file type.`);
-          } else if (file.size > maxSizeBytes) {
-            this.errorMessages.push(`File "${file.name}" is invalid: File size exceeds the maximum limit of 5 MB.`);
-          }
-        });
-
-        // Display error messages
-        if (this.errorMessages.length > 0) {
-          this.errorMessage = `The following files are not acceptable:\n${this.errorMessages.join('\n')}`;
-          setTimeout(() => {
-            this.errorMessage = '';
-          }, 3000);
-          // Optionally clear the file input
-          input.value = ''; 
-          return;
+      // Validate files
+      fileArray.forEach((file) => {
+        if (!allowedTypes.includes(file.type)) {
+          this.errorMessages.push(
+            `File "${file.name}" is invalid: Invalid file type.`
+          );
+        } else if (file.size > maxSizeBytes) {
+          this.errorMessages.push(
+            `File "${file.name}" is invalid: File size exceeds the maximum limit of 5 MB.`
+          );
         }
-        const preservedFiles = this.isEditClicked ? [...this.files] : this.detailsForm.controls['file'].value;
-        const prevFiles = this.detailsForm.controls['file'].value;
-        console.log('Preserved Files:', preservedFiles);
-        var updatedFiles: any[] = [];
-        var newFiles: any[] = [];
-        if (preservedFiles.length > 0) {
-          updatedFiles = [...preservedFiles, ...fileArray];
-        } else {
-          updatedFiles = fileArray;
+      });
+
+      // Check for duplicate file names
+      const existingFileNames = new Set(this.files.map((f) => f.filename));
+      console.log('Existing File Names:', existingFileNames);
+      fileArray.forEach((file) => {
+        if (existingFileNames.has(file.name)) {
+          this.errorMessages.push(
+            `File "${file.name}" is already present. Cannot upload again with the same name.`
+          );
         }
-        newFiles = [...prevFiles, ...fileArray];
-        console.log('New Files:', newFiles);
-        console.log('Updated Files:', updatedFiles);
+      });
 
-        this.detailsForm.get('file')?.setValue(newFiles);
+      if (this.isEditClicked) {
+      }
 
-        this.files = updatedFiles.map((file, index) => {
-          return {
-              id: this.isEditClicked && this.files[index]?.id !== undefined ? this.files[index]?.id : index, // Ensure unique IDs
-              filename: file.name,
-              blob: file // Store Blob directly; it will be converted to File later if needed
-          };
-        });
+      // Display error messages
+      if (this.errorMessages.length > 0) {
+        this.errorMessage = `The following files are not acceptable:\n${this.errorMessages.join(
+          '\n'
+        )}`;
+        setTimeout(() => {
+          this.errorMessage = '';
+        }, 3000);
+        // Optionally clear the file input
+        input.value = '';
+        return;
+      }
+      const preservedFiles = this.isEditClicked
+        ? [...this.files]
+        : this.detailsForm.controls['file'].value;
+      const prevFiles = this.detailsForm.controls['file'].value;
+      console.log('Preserved Files:', preservedFiles);
+      var updatedFiles: any[] = [];
+      var newFiles: any[] = [];
+      if (preservedFiles.length > 0) {
+        updatedFiles = [...preservedFiles, ...fileArray];
+      } else {
+        updatedFiles = fileArray;
+      }
+      newFiles = [...prevFiles, ...fileArray];
+      console.log('New Files:', newFiles);
+      console.log('Updated Files:', updatedFiles);
 
-        console.log('Files:', this.files);
-    }
-    else {
+      this.detailsForm.get('file')?.setValue(newFiles);
+
+      this.files = updatedFiles.map((file, index) => {
+        return {
+          id:
+            this.isEditClicked && this.files[index]?.id !== undefined
+              ? this.files[index]?.id
+              : index, // Ensure unique IDs
+          filename: file.name,
+          blob: file, // Store Blob directly; it will be converted to File later if needed
+        };
+      });
+
+      console.log('Files:', this.files);
+    } else {
       this.detailsForm.get('file')?.setValue([]);
-      this.files = []; 
+      this.files = [];
       console.log('No files selected or files removed.');
     }
   }
 
-  
-  private convertBase64ToBlob(base64Data: string, contentType: string, fileName: string): Blob {
+  private convertBase64ToBlob(
+    base64Data: string,
+    contentType: string,
+    fileName: string
+  ): Blob {
     const byteCharacters = atob(base64Data);
     const byteArrays = [];
 
@@ -348,13 +415,19 @@ export class DetailsDialogComponent implements OnInit {
   private getFileContentType(filename: string): string {
     const extension = filename.split('.').pop()?.toLowerCase();
     switch (extension) {
-      case 'pdf': return 'application/pdf';
+      case 'pdf':
+        return 'application/pdf';
       case 'jpg':
-      case 'jpeg': return 'image/jpeg';
-      case 'png': return 'image/png';
-      case 'doc': return 'application/msword';
-      case 'docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-      default: return 'application/octet-stream';
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'doc':
+        return 'application/msword';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      default:
+        return 'application/octet-stream';
     }
   }
 
@@ -362,12 +435,12 @@ export class DetailsDialogComponent implements OnInit {
     if (file.blob) {
       try {
         const url = URL.createObjectURL(file.blob);
-  
+
         // Open the file in a new window/tab
         window.open(url, '_blank');
-        
+
         // Optionally, you can revoke the Object URL after a short delay
-        setTimeout(() => URL.revokeObjectURL(url), 10000); 
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
       } catch (error) {
         console.error('Error previewing file:', error);
       }
@@ -380,7 +453,7 @@ export class DetailsDialogComponent implements OnInit {
     if (this.isEditClicked) {
       this.fileService.deleteFile(fileId).subscribe(
         () => {
-          this.files = this.files.filter(file => file.id !== fileId);
+          this.files = this.files.filter((file) => file.id !== fileId);
           console.log('File deleted successfully');
           console.log('Files after deleting:', this.files);
           if (this.files.length === 0) {
@@ -388,100 +461,112 @@ export class DetailsDialogComponent implements OnInit {
           }
           this.errorMessage = null;
         },
-        error => {
+        (error) => {
           console.error('Error deleting file:', error);
           this.errorMessage = 'Error deleting file. Please try again.';
         }
       );
     } else {
-      this.files = this.files.filter(file => file.id !== fileId);
+      this.files = this.files.filter((file) => file.id !== fileId);
       console.log('File removed locally');
       this.errorMessage = null;
     }
   }
-  
 
   onSubmit() {
     if (this.detailsForm.valid) {
-        const formValue = this.detailsForm.value;
-        // Format dates
-        formValue.dob = new Date(formValue.dob).toISOString();
-        formValue.expStart = new Date(formValue.expStart).toISOString();
-        formValue.expEnd = new Date(this.detailsForm.controls['expEnd'].value).toISOString();
-        const stateIds = formValue.state.join(',');
+      const formValue = this.detailsForm.value;
+      // Format dates
+      formValue.dob = new Date(formValue.dob).toISOString();
+      formValue.expStart = new Date(formValue.expStart).toISOString();
+      formValue.expEnd = new Date(
+        this.detailsForm.controls['expEnd'].value
+      ).toISOString();
+      const stateIds = formValue.state.join(',');
 
-        let clientDetails: ClientDetails = {
-            name: this.detailsForm.get('name')?.value,
-            email: this.detailsForm.get('email')?.value,
-            clientId: this.detailsForm.get('client')?.value, 
-            stateId: stateIds, 
-            dob: formValue.dob,
-            expStart: formValue.expStart, 
-            expEnd: formValue.expEnd,
-            payValue: this.detailsForm.get(this.isStateChanged ? 'percentage' : 'hourlyRate')?.value,
-            payType: this.payType,
-            gender: this.detailsForm.get('gender')?.value,
-            files: this.detailsForm.get('file')?.value
-        };
-        
-        const formData = new FormData();
-        formData.append('name', clientDetails.name);
-        formData.append('email', clientDetails.email);
-        formData.append('clientId', clientDetails.clientId.toString());
-        formData.append('stateId', clientDetails.stateId);
-        formData.append('dob', clientDetails.dob);
-        formData.append('expStart', clientDetails.expStart);
-        formData.append('expEnd', clientDetails.expEnd);
-        formData.append('payValue', clientDetails.payValue.toString());
-        formData.append('payType', this.payType);
-        formData.append('gender', clientDetails.gender);
+      let clientDetails: ClientDetails = {
+        name: this.detailsForm.get('name')?.value,
+        email: this.detailsForm.get('email')?.value,
+        clientId: this.detailsForm.get('client')?.value,
+        stateId: stateIds,
+        dob: formValue.dob,
+        expStart: formValue.expStart,
+        expEnd: formValue.expEnd,
+        payValue: this.detailsForm.get(
+          this.isStateChanged ? 'percentage' : 'hourlyRate'
+        )?.value,
+        payType: this.payType,
+        gender: this.detailsForm.get('gender')?.value,
+        files: this.detailsForm.get('file')?.value,
+      };
 
-        if (this.detailsForm.get('file')?.value.length > 0) {
-            const files: File[] = this.detailsForm.get('file')?.value;
-            files.forEach(file => {
-                formData.append('files', file, file.name);
-            });
-        }
-        console.log('Client Details:', clientDetails);
+      const formData = new FormData();
+      formData.append('name', clientDetails.name);
+      formData.append('email', clientDetails.email);
+      formData.append('clientId', clientDetails.clientId.toString());
+      formData.append('stateId', clientDetails.stateId);
+      formData.append('dob', clientDetails.dob);
+      formData.append('expStart', clientDetails.expStart);
+      formData.append('expEnd', clientDetails.expEnd);
+      formData.append('payValue', clientDetails.payValue.toString());
+      formData.append('payType', this.payType);
+      formData.append('gender', clientDetails.gender);
 
-        if (this.isEditClicked) {
-          formData.append('id', this.editDetailsId.toString());
-          console.log('Client Details:', formData);
-          // Call update service here
-          this.dialogService.updateClientDetails(formData, this.editDetailsId).subscribe(response => {
-            console.log('Client Details Updated:');
-            let msg = 'Details updated successfully.';
-            const successDialogRef = this.dialog.open(SuccessDialogComponent, {
+      if (this.detailsForm.get('file')?.value.length > 0) {
+        const files: File[] = this.detailsForm.get('file')?.value;
+        files.forEach((file) => {
+          formData.append('files', file, file.name);
+        });
+      }
+      console.log('Client Details:', clientDetails);
+
+      if (this.isEditClicked) {
+        formData.append('id', this.editDetailsId.toString());
+        console.log('Client Details:', formData);
+        // Call update service here
+        this.dialogService
+          .updateClientDetails(formData, this.editDetailsId)
+          .subscribe(
+            (response) => {
+              console.log('Client Details Updated:');
+              let msg = 'Details updated successfully.';
+              const successDialogRef = this.dialog.open(
+                SuccessDialogComponent,
+                {
                   data: { message: msg },
                   width: '400px',
-                  height: '250px'
-                });
-                successDialogRef.afterClosed().subscribe(() => {
-                  this.dialog.closeAll(); 
-                });
-            this.editDetailsId = undefined;
-          }, error => {
-            console.error('Error updating client details:', error);
-          });
-        }
-        else {
-          console.log("Form with Files: ", formData);
-          this.dialogService.createClientDetails(formData).subscribe(response => {
-              console.log('Client Details Created:', response);
-             // Open success dialog
-                  const successDialogRef = this.dialog.open(SuccessDialogComponent, {
-                    data: { message: 'Details and files added successfully.' },
-                    width: '400px',
-                    height: '250px'
-                  });
-                  successDialogRef.afterClosed().subscribe(() => {
-                    this.dialog.closeAll(); 
-                  });
-          }, error => {
-              console.error('Error creating client details:', error);
-
-          });
-      } 
+                  height: '250px',
+                }
+              );
+              successDialogRef.afterClosed().subscribe(() => {
+                this.dialog.closeAll();
+              });
+              this.editDetailsId = undefined;
+            },
+            (error) => {
+              console.error('Error updating client details:', error);
+            }
+          );
+      } else {
+        console.log('Form with Files: ', formData);
+        this.dialogService.createClientDetails(formData).subscribe(
+          (response) => {
+            console.log('Client Details Created:', response);
+            // Open success dialog
+            const successDialogRef = this.dialog.open(SuccessDialogComponent, {
+              data: { message: 'Details and files added successfully.' },
+              width: '400px',
+              height: '250px',
+            });
+            successDialogRef.afterClosed().subscribe(() => {
+              this.dialog.closeAll();
+            });
+          },
+          (error) => {
+            console.error('Error creating client details:', error);
+          }
+        );
+      }
     } else {
       console.error('Form is invalid');
     }

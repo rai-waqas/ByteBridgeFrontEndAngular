@@ -1,183 +1,299 @@
-  <div class="title">
-    <p class="plus">+</p>
-    <h2>Enter Details</h2>
-  </div>
-  <mat-dialog-content>
-    <form [formGroup]="detailsForm" (ngSubmit)="onSubmit()">
-      <!-- Name and Email -->
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="custom-form-field">
-          <mat-label>Name</mat-label>
-          <input matInput formControlName="name">
-          <mat-error *ngIf="detailsForm.get('name')?.hasError('required')">
-            Name is required.
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="custom-form-field">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email">
-          <mat-error *ngIf="detailsForm.get('email')?.hasError('required')">
-            Email is required.
-          </mat-error>
-          <mat-error *ngIf="detailsForm.get('email')?.hasError('email')">
-            Enter a valid email address.
-          </mat-error>
-          <mat-error *ngIf="detailsForm.get('email')?.hasError('emailDot') && !detailsForm.get('email')?.hasError('email')">
-            Enter a valid email address.
-          </mat-error>
-        </mat-form-field>
-      </div>
-  
-      <!-- Client and State -->
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="custom-form-field">
-          <mat-label>Client</mat-label>
-          <mat-select formControlName="client">
-            <mat-option *ngFor="let client of clients" [value]="client.id">{{client.name}}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="custom-form-field">
-          <mat-label>State</mat-label>
-          <mat-select formControlName="state" multiple>
-            <mat-option *ngFor="let state of states" [value]="state.id">{{state.name}}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-  
-      <!-- Date of Birth, Experience Start, and Experience End -->
-      <div class="form-row">
-        <mat-form-field class="dob" appearance="outline">
-          <mat-label>Date of Birth</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="dob" [max]="today">
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-          <mat-error *ngIf="detailsForm.get('dob')?.hasError('required')">
-            Date of Birth is required.
-          </mat-error>
-          <mat-error *ngIf="detailsForm.get('dob')?.hasError('invalidDate')">
-            Date of Birth cannot be in the future.
-          </mat-error>
-          <mat-error *ngIf="detailsForm.get('dob')?.hasError('invalidDateRange')">
-            Date of Birth cannot be after Experience Start date.
-          </mat-error>
-        </mat-form-field>
-        <div class="experience">
-          <mat-form-field class="expStart" appearance="outline" class="custom-form-field">
-            <mat-label>Experience Start</mat-label>
-            <input matInput [matDatepicker]="pickerStart" formControlName="expStart" [max]="today">
-            <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
-            <mat-datepicker #pickerStart></mat-datepicker>
-            <mat-error *ngIf="detailsForm.get('expStart')?.hasError('required')">
-              Experience Start is required.
-            </mat-error>
-            <mat-error *ngIf="detailsForm.get('expStart')?.hasError('invalidDate')">
-              Experience Start cannot be in the future.
-            </mat-error>
-          </mat-form-field>
-          <mat-form-field class="expEnd" appearance="outline" class="custom-form-field">
-            <mat-label>Experience End</mat-label>
-            <input matInput [matDatepicker]="pickerEnd" formControlName="expEnd" [max]="today">
-            <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
-            <mat-datepicker #pickerEnd></mat-datepicker>
-            <mat-error *ngIf="detailsForm.get('expEnd')?.hasError('required')">
-              Experience End is required.
-            </mat-error>
-            <mat-error *ngIf="detailsForm.get('expEnd')?.hasError('invalidDate')">
-              Experience End cannot be in the future.
-            </mat-error>
-            <mat-error *ngIf="detailsForm.get('expEnd')?.hasError('invalidExperienceDates')">
-              Experience End must be after Experience Start.
-            </mat-error>
-          </mat-form-field>
-        </div>
-      </div>
-      <mat-checkbox (change)="onPresentChange($event)" class="present">Present</mat-checkbox>
-  
-      <!-- Years of Experience -->
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Years of Experience</mat-label>
-          <input matInput formControlName="yearsOfExperience" class="exp-field">
-        </mat-form-field>
-      </div>
-      <mat-checkbox (change)="onStateChange($event)" [checked]="isStateChanged">Change State</mat-checkbox>
-  
-      <!-- Hourly Rate or Percentage -->
-      <div class="form-row">
-        <mat-form-field *ngIf="!isStateChanged" appearance="outline" class="hourly-field">
-          <mat-label>Hourly Rate</mat-label>
-          <input matInput type="number" formControlName="hourlyRate" min="0">
-          <mat-icon matSuffix>paid</mat-icon>
-        </mat-form-field>
-        <mat-form-field *ngIf="isStateChanged" appearance="outline" class="hourly-field">
-          <mat-label>Percentage</mat-label>
-          <input matInput type="number" formControlName="percentage" min="0" max="100">
-          <mat-icon matSuffix>percent</mat-icon>
-          <mat-error *ngIf="detailsForm.get('percentage')?.hasError('required') && detailsForm.get('hourlyRate')?.touched">
-            Percentage is required.
-          </mat-error>
-          <mat-error *ngIf="detailsForm.get('percentage')?.hasError('min')">
-            Percentage must be at least 0.
-          </mat-error>
-          <mat-error *ngIf="detailsForm.get('percentage')?.hasError('max')">
-            Percentage must be at most 100.
-          </mat-error>
-        </mat-form-field>
-      </div>
-      <mat-error *ngIf="detailsForm.get('hourlyRate')?.hasError('required') && detailsForm.get('hourlyRate')?.touched">
-        Hourly Rate is Required.
-      </mat-error>
-  
-      <!-- Gender Radio Buttons -->
-      <div>
-        <label id="example-radio-group-label">Gender</label><br>
-        <mat-radio-group aria-labelledby="example-radio-group-label" formControlName="gender">
-          <mat-radio-button value="M">Male</mat-radio-button><br>
-          <mat-radio-button value="F">Female</mat-radio-button><br>
-          <mat-radio-button value="O">Other</mat-radio-button>
-        </mat-radio-group>
-        <mat-error *ngIf="detailsForm.get('gender')?.hasError('required') && detailsForm.get('gender')?.touched">
-          Gender is required.
+<div class="title">
+  <p class="plus">+</p>
+  <h2>Enter Details</h2>
+</div>
+<div class="details-form">
+  <form [formGroup]="detailsForm" (ngSubmit)="onSubmit()">
+    <!-- Name and Email -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="custom-form-field">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" />
+        <mat-error *ngIf="detailsForm.get('name')?.hasError('required')">
+          Name is required.
         </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="custom-form-field">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+        <mat-error *ngIf="detailsForm.get('email')?.hasError('required')">
+          Email is required.
+        </mat-error>
+        <mat-error *ngIf="detailsForm.get('email')?.hasError('email')">
+          Enter a valid email address.
+        </mat-error>
+        <mat-error
+          *ngIf="
+            detailsForm.get('email')?.hasError('emailDot') &&
+            !detailsForm.get('email')?.hasError('email')
+          "
+        >
+          Enter a valid email address.
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Client and State -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="custom-form-field">
+        <mat-label>Client</mat-label>
+        <mat-select formControlName="client">
+          <mat-option *ngFor="let client of clients" [value]="client.id">{{
+            client.name
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="custom-form-field">
+        <mat-label>State</mat-label>
+        <mat-select formControlName="state" multiple>
+          <mat-option *ngFor="let state of states" [value]="state.id">{{
+            state.name
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Date of Birth, Experience Start, and Experience End -->
+    <div class="form-row">
+      <mat-form-field class="dob" appearance="outline">
+        <mat-label>Date of Birth</mat-label>
+        <input
+          matInput
+          [matDatepicker]="picker"
+          formControlName="dob"
+          [max]="today"
+        />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="detailsForm.get('dob')?.hasError('required')">
+          Date of Birth is required.
+        </mat-error>
+        <mat-error *ngIf="detailsForm.get('dob')?.hasError('invalidDate')">
+          Date of Birth cannot be in the future.
+        </mat-error>
+        <mat-error *ngIf="detailsForm.get('dob')?.hasError('invalidDateRange')">
+          Date of Birth cannot be after Experience Start date.
+        </mat-error>
+      </mat-form-field>
+      <div class="experience">
+        <mat-form-field
+          class="expStart"
+          appearance="outline"
+          class="custom-form-field"
+        >
+          <mat-label>Experience Start</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerStart"
+            formControlName="expStart"
+            [max]="today"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="pickerStart"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #pickerStart></mat-datepicker>
+          <mat-error *ngIf="detailsForm.get('expStart')?.hasError('required')">
+            Experience Start is required.
+          </mat-error>
+          <mat-error
+            *ngIf="detailsForm.get('expStart')?.hasError('invalidDate')"
+          >
+            Experience Start cannot be in the future.
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field
+          class="expEnd"
+          appearance="outline"
+          class="custom-form-field"
+        >
+          <mat-label>Experience End</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerEnd"
+            formControlName="expEnd"
+            [max]="today"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="pickerEnd"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #pickerEnd></mat-datepicker>
+          <mat-error *ngIf="detailsForm.get('expEnd')?.hasError('required')">
+            Experience End is required.
+          </mat-error>
+          <mat-error *ngIf="detailsForm.get('expEnd')?.hasError('invalidDate')">
+            Experience End cannot be in the future.
+          </mat-error>
+          <mat-error
+            *ngIf="
+              detailsForm.get('expEnd')?.hasError('invalidExperienceDates')
+            "
+          >
+            Experience End must be after Experience Start.
+          </mat-error>
+        </mat-form-field>
       </div>
-  
-      <!-- File Attachment -->
-      <div class="file-upload-area"
-           (click)="fileInput.click()"
-           (dragover)="$event.preventDefault()">
-        <mat-icon>attach_file</mat-icon>
-        <p>Drop your attachments here or 
-          <a href="#" (click)="handleBrowseClick($event)">browse</a>
-        </p>
-        <p class="file-types">PDF, DOC, DOCX, JPG, JPEG or PNG (max. 5 MB)</p>
-        <input type="file" #fileInput style="display: none" 
-        (change)="onFilesSelected($event)" 
+    </div>
+    <mat-checkbox (change)="onPresentChange($event)" class="present"
+      >Present</mat-checkbox
+    >
+
+    <!-- Years of Experience -->
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Years of Experience</mat-label>
+        <input matInput formControlName="yearsOfExperience" class="exp-field" />
+      </mat-form-field>
+    </div>
+    <mat-checkbox (change)="onStateChange($event)" [checked]="isStateChanged"
+      >Change State</mat-checkbox
+    >
+
+    <!-- Hourly Rate or Percentage -->
+    <div class="form-row">
+      <mat-form-field
+        *ngIf="!isStateChanged"
+        appearance="outline"
+        class="hourly-field"
+      >
+        <mat-label>Hourly Rate</mat-label>
+        <input matInput type="number" formControlName="hourlyRate" min="0" />
+        <mat-icon matSuffix>paid</mat-icon>
+        <mat-error
+      *ngIf="
+        detailsForm.get('hourlyRate')?.hasError('required') &&
+        detailsForm.get('hourlyRate')?.touched
+      "
+    >
+      Hourly Rate is Required.
+    </mat-error>
+    <mat-error
+      *ngIf="
+        detailsForm.get('hourlyRate')?.hasError('min') &&
+        detailsForm.get('hourlyRate')?.touched
+      "
+    >
+      Hourly Rate cannot be negative.
+    </mat-error>
+      </mat-form-field>
+      
+      <mat-form-field
+        *ngIf="isStateChanged"
+        appearance="outline"
+        class="hourly-field"
+      >
+        <mat-label>Percentage</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="percentage"
+          min="0"
+          max="100"
+        />
+        <mat-icon matSuffix>percent</mat-icon>
+        <mat-error
+          *ngIf="
+            detailsForm.get('percentage')?.hasError('required') &&
+            detailsForm.get('percentage')?.touched
+          "
+        >
+          Percentage is required.
+        </mat-error>
+        <mat-error *ngIf="detailsForm.get('percentage')?.hasError('min')">
+          Percentage must be at least 0.
+        </mat-error>
+        <mat-error *ngIf="detailsForm.get('percentage')?.hasError('max')">
+          Percentage must be at most 100.
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Gender Radio Buttons -->
+    <div>
+      <label id="example-radio-group-label">Gender</label><br />
+      <mat-radio-group
+        aria-labelledby="example-radio-group-label"
+        formControlName="gender"
+      >
+        <mat-radio-button value="M">Male</mat-radio-button><br />
+        <mat-radio-button value="F">Female</mat-radio-button><br />
+        <mat-radio-button value="O">Other</mat-radio-button>
+      </mat-radio-group>
+      <mat-error
+        *ngIf="
+          detailsForm.get('gender')?.hasError('required') &&
+          detailsForm.get('gender')?.touched
+        "
+      >
+        Gender is required.
+      </mat-error>
+    </div>
+
+    <!-- File Attachment -->
+    <div
+      class="file-upload-area"
+      (click)="fileInput.click()"
+      (dragover)="$event.preventDefault()"
+    >
+      <mat-icon class="attachment-icon">attach_file</mat-icon>
+      <p>
+        Drop your attachments here or
+        <a href="#" (click)="handleBrowseClick($event)">browse</a>
+      </p>
+      <p class="file-types">PDF, DOC, DOCX, JPG, JPEG or PNG (max. 5 MB)</p>
+      <input
+        type="file"
+        #fileInput
+        style="display: none"
+        (change)="onFilesSelected($event)"
         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-        multiple>
-      </div>
- 
-      <div *ngIf="errorMessage" class="error-message">
-        {{ errorMessage }}
-      </div>
-      <div *ngIf="files.length > 0" class="file-attachments">
-        <h3>Attachments:</h3>
-        <ul>
-          <li *ngFor="let file of files">
-            {{ file.filename || file.blob.filename}}
-            <button class="fileButton" mat-icon-button type="button" (click)="previewFile(file)">
+        multiple
+      />
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+    <div *ngIf="files.length > 0" class="file-attachments">
+      <h3>Attachments:</h3>
+      <!-- <ul> -->
+      <div *ngFor="let file of files">
+        <div class="outer-class">
+          {{ file.filename || file.blob.filename }}
+          <div class="inner-class">
+            <button
+              class="fileButton"
+              mat-icon-button
+              type="button"
+              (click)="previewFile(file)"
+            >
               <mat-icon>preview</mat-icon>
             </button>
-            <button class="fileButton" mat-icon-button type="button" (click)="deleteFile(file.id)">
+            <button
+              class="fileButton"
+              mat-icon-button
+              type="button"
+              (click)="deleteFile(file.id)"
+            >
               <mat-icon>delete</mat-icon>
             </button>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
-  
-      <mat-dialog-actions class="buttons">
-        <button mat-button mat-dialog-close class="cancel-btn">Cancel</button>
-        <button mat-button type="submit" class="save-btn" [disabled]="detailsForm.invalid">Save</button>
-      </mat-dialog-actions>
-    </form>
-  </mat-dialog-content>
-  
+      <!-- </ul> -->
+    </div>
+
+    <div class="buttons fixed-bottom">
+      <button mat-button mat-dialog-close class="cancel-btn">Cancel</button>
+      <button
+        mat-button
+        type="submit"
+        class="save-btn"
+        [disabled]="detailsForm.invalid"
+      >
+        Save
+      </button>
+    </div>
+  </form>
+</div>
