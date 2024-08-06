@@ -147,7 +147,7 @@
       </mat-form-field>
     </div>
     <mat-checkbox (change)="onStateChange($event)" [checked]="isStateChanged"
-      >Change State</mat-checkbox
+      >Change Pay Rate to {{isStateChanged === true ? 'Hourly' : 'Percentage'}}</mat-checkbox
     >
 
     <!-- Hourly Rate or Percentage -->
@@ -211,7 +211,7 @@
 
     <!-- Gender Radio Buttons -->
     <div>
-      <label id="example-radio-group-label">Gender</label><br />
+      <label id="example-radio-group-label">Gender *</label><br />
       <mat-radio-group
         aria-labelledby="example-radio-group-label"
         formControlName="gender"

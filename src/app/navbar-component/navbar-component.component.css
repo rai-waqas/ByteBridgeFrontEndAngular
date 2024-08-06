@@ -1,11 +1,14 @@
-.navbar{
-    border: 1px solid #c0bebe;
-    display: flex;
+.navbar {
+  border: 1px solid #c0bebe;
+  display: flex;
 }
 .menu-trigger-right {
-    margin-left: auto;
+  margin-left: auto;
 }
-.matMenu{
-    display: flex;
-    float: right;
+.matMenu {
+  display: flex;
+  float: right;
+}
+.icons {
+  cursor: pointer;
 }

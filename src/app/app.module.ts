@@ -11,6 +11,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { SuccessDialogComponent } from './main-component/details-dialog/success-dialog/success-dialog.component';
 import { ConfirmDialogComponent } from './main-component/confirm-dialog/confirm-dialog.component';
+import { ToastNoAnimationModule, ToastrModule } from 'ngx-toastr';
 
 
 
@@ -28,7 +29,11 @@ import { ConfirmDialogComponent } from './main-component/confirm-dialog/confirm-
     BrowserAnimationsModule,
     MaterialModule,
     ReactiveFormsModule,
-    HttpClientModule
+    HttpClientModule,
+    ToastrModule.forRoot({
+      positionClass: 'toast-bottom-right',
+    }),
+    ToastNoAnimationModule.forRoot(),
   ],
   providers: [],
   bootstrap: [AppComponent]

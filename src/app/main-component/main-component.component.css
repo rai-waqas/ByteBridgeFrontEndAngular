@@ -1,49 +1,61 @@
 .main-component {
-    width: 95%;
-    background-color: #ffffff;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 5px;
-  }
+  width: 95%;
+  background-color: #ffffff;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 5px;
+}
 
-  .search-div {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-  }
+.search-div {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+}
 
-  .search-form-field {
-    display: flex;
-    align-items: center;
-    gap: 10px; 
-    width: 300px; 
-  }
-  
-  .search-form-field mat-icon {
-    margin-left: 10px;
-    font-size: 20px;
-  }
-  
-  .add-details-btn {
-    display: flex;
-    align-items: center;
-    height: 0;
-    padding: 15px;
-    border-radius: 5px;
-    background-color: rgb(37, 35, 35);
-    color: white;
-    margin-bottom: 10px;
-  }
-  .content-div{
-    border: 1px solid #c0bebe;
-    border-radius: 10px;
-  }
+.search-form-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 300px;
+}
 
- .edit-icon{
+.close-icon {
+  margin-right: 10px;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.search-form-field mat-icon {
+  margin-left: 10px;
+  font-size: 20px;
+}
+
+.add-details-btn {
+  display: flex;
+  align-items: center;
+  height: 0;
+  padding: 15px;
+  border-radius: 5px;
+  background-color: rgb(37, 35, 35);
+  color: white;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.content-div {
+  border: 1px solid #c0bebe;
+  border-radius: 10px;
+}
+
+.edit-icon {
   margin-right: 20px;
- }
- .header-row{
-  background-color: #F0F1F3;
- }
+  cursor: pointer;
+}
+
+.delete-icon{
+  cursor: pointer;
+}
+.header-row {
+  background-color: #f0f1f3;
+}

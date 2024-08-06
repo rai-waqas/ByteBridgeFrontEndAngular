@@ -7,6 +7,9 @@
                     <mat-icon>search</mat-icon>
                 </span>
                 <input matInput type="text" [formControl]="searchControl" placeholder="Search">
+                <span matSuffix >
+                    <mat-icon class="close-icon" (click)="onCloseIconClick()">close</mat-icon>
+                </span>
             </mat-form-field>
             <button type="button" class="add-details-btn" (click)="openDialog()">
                 <mat-icon>add</mat-icon>
@@ -50,7 +53,7 @@
                 <mat-cell *matCellDef="let document">
                     <div class="action-icons">
                         <mat-icon (click)="openEditDialog(document)" class="edit-icon">edit</mat-icon>
-                        <mat-icon (click)="confirmDelete(document.id)">delete_outline</mat-icon>
+                        <mat-icon (click)="confirmDelete(document.id)" class="delete-icon">delete_outline</mat-icon>
                     </div>
                 </mat-cell>
             </ng-container>

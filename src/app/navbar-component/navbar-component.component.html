@@ -1,18 +1,18 @@
 <mat-toolbar class="navbar">
-    <mat-toolbar-row>
-      <a class="navbar-brand">
-        <img src="assets/logo.png" alt="Logo" width="80%" height="37">
-      </a>
-      <span class="example-spacer"></span>
-        <div [matMenuTriggerFor]="menu" class="menu-trigger-right">
-            <mat-icon >account_circle</mat-icon>
-            <mat-icon >keyboard_arrow_down</mat-icon>
-        </div>        
-      <mat-menu #menu="matMenu" class="matMenu">
-        <button mat-menu-item class="matMenuItem">
-          <mat-icon>logout</mat-icon>
-          <span>Logout</span>
-        </button>
-      </mat-menu>
-    </mat-toolbar-row>
-  </mat-toolbar>
+  <mat-toolbar-row>
+    <a class="navbar-brand">
+      <img src="assets/logo.png" alt="Logo" width="80%" height="37" />
+    </a>
+    <span class="example-spacer"></span>
+    <div [matMenuTriggerFor]="menu" class="menu-trigger-right">
+      <mat-icon class="icons">account_circle</mat-icon>
+      <mat-icon class="icons">keyboard_arrow_down</mat-icon>
+    </div>
+    <mat-menu #menu="matMenu" class="matMenu">
+      <button mat-menu-item class="matMenuItem">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </mat-toolbar-row>
+</mat-toolbar>

@@ -3,21 +3,26 @@
     border-radius: 5px;
     background-color: rgb(255, 255, 255);
     color: rgb(37, 37, 37);
+    width: 50%;
   }
   .delete-btn{
     padding: 15px;
     border-radius: 5px;
     background-color: rgb(252, 47, 47);
     color: rgb(37, 37, 37);
+    width: 50%;
   }
 
   .confirm-div{
-    padding: 10px;
+    margin: 15px;
+    padding: 5px 10px 5px 10px;
+    border: 1px dotted #a7a7a7;
+    border-radius: 10px;
   }
 
   .mat-dialog-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 10px; 
     padding: 16px;
     border-top: 1px solid #e0e0e0; 

@@ -8,6 +8,7 @@ import { FileService } from './details-dialog-services/file.service';
 import { ElementRef, ViewChild } from '@angular/core';
 import { emailDotValidator } from '../../validators/validators';
 import { dateRangeValidator } from '../../validators/validators';
+import { ToastrService } from 'ngx-toastr';
 
 export interface Files {
   id: number;
@@ -58,6 +59,7 @@ export class DetailsDialogComponent implements OnInit {
     private dialogService: DialogService,
     private dialog: MatDialog,
     private fileService: FileService,
+    private toastr: ToastrService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.isEditClicked = data?.isEditClicked ?? false;
@@ -450,7 +452,13 @@ export class DetailsDialogComponent implements OnInit {
   }
 
   deleteFile(fileId: number) {
-    if (this.isEditClicked) {
+    // Find the file with the given ID in the files array
+    const fileToDelete = this.files.find((file) => file.id === fileId);
+    
+    // Remove the file from the local array regardless of its upload status
+    this.files = this.files.filter((file) => file.id !== fileId);
+    console.log('File removed locally');
+    if (fileToDelete && this.isEditClicked) {
       this.fileService.deleteFile(fileId).subscribe(
         () => {
           this.files = this.files.filter((file) => file.id !== fileId);
@@ -462,8 +470,6 @@ export class DetailsDialogComponent implements OnInit {
           this.errorMessage = null;
         },
         (error) => {
-          console.error('Error deleting file:', error);
-          this.errorMessage = 'Error deleting file. Please try again.';
         }
       );
     } else {
@@ -544,7 +550,7 @@ export class DetailsDialogComponent implements OnInit {
               this.editDetailsId = undefined;
             },
             (error) => {
-              console.error('Error updating client details:', error);
+              this.toastr.error(error.error);
             }
           );
       } else {
@@ -563,7 +569,7 @@ export class DetailsDialogComponent implements OnInit {
             });
           },
           (error) => {
-            console.error('Error creating client details:', error);
+            this.toastr.error(error.error);
           }
         );
       }
