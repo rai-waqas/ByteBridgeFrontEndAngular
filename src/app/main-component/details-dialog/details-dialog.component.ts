@@ -9,6 +9,7 @@ import { ElementRef, ViewChild } from '@angular/core';
 import { emailDotValidator } from '../../validators/validators';
 import { dateRangeValidator } from '../../validators/validators';
 import { ToastrService } from 'ngx-toastr';
+import cli from '@angular/cli';
 
 export interface Files {
   id: number;
@@ -49,11 +50,10 @@ export class DetailsDialogComponent implements OnInit {
   clientDetails: DocumentData | undefined;
   editDetailsId: any;
   files: any[] = [];
-  newFiles: any[] = [];
-  filesToDisplay: Files[] = [];
   errorMessages: string[] = [];
   errorMessage: string | null = null;
   today: Date;
+  newlyAddedFiles?: File[] = [];
 
   constructor(
     private dialogService: DialogService,
@@ -68,16 +68,15 @@ export class DetailsDialogComponent implements OnInit {
     this.today.setDate(this.today.getDate() - 1);
     if (this.isEditClicked) {
       if (data.clientDetail?.files) {
-        console.log('Inside Files');
         this.files = data.clientDetail.files.map((file: Files) => ({
           ...file,
+          clientDetailsId: this.clientDetails?.id,
           blob: this.convertBase64ToBlob(
             file.filedata,
             this.getFileContentType(file.filename),
             file.filename
           ),
         }));
-        console.log('Client Details Now:', this.files);
       }
     }
   }
@@ -297,121 +296,157 @@ export class DetailsDialogComponent implements OnInit {
 
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const fileArray = Array.from(input.files);
+    this.errorMessages = [];
+    if (input.files) {
+      const selectedFiles = Array.from(input.files);
 
-      // Define acceptable formats and size limit
-      const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'image/jpeg',
-        'image/jpg',
-        'image/png',
-      ];
-      const maxSizeMB = 5;
-      const maxSizeBytes = maxSizeMB * 1024 * 1024; // Convert MB to bytes
-      this.errorMessage = null;
-      this.errorMessages = [];
+      // Define allowed file formats and max size (5 MB)
+      const allowedFormats = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
+      const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
 
-      // Validate files
-      fileArray.forEach((file) => {
-        if (!allowedTypes.includes(file.type)) {
-          this.errorMessages.push(
-            `File "${file.name}" is invalid: Invalid file type.`
-          );
-        } else if (file.size > maxSizeBytes) {
-          this.errorMessages.push(
-            `File "${file.name}" is invalid: File size exceeds the maximum limit of 5 MB.`
-          );
-        }
-      });
-
-      // Check for duplicate file names
-      const existingFileNames = new Set(this.files.map((f) => f.filename));
-      console.log('Existing File Names:', existingFileNames);
-      fileArray.forEach((file) => {
-        if (existingFileNames.has(file.name)) {
-          this.errorMessages.push(
-            `File "${file.name}" is already present. Cannot upload again with the same name.`
-          );
-        }
-      });
+      let errors: string[] = [];
 
       if (this.isEditClicked) {
-      }
+        this.newlyAddedFiles?.push(...selectedFiles);
 
-      // Display error messages
-      if (this.errorMessages.length > 0) {
-        this.errorMessage = `The following files are not acceptable:\n${this.errorMessages.join(
-          '\n'
-        )}`;
-        setTimeout(() => {
-          this.errorMessage = '';
-        }, 3000);
-        // Optionally clear the file input
-        input.value = '';
-        return;
-      }
-      const preservedFiles = this.isEditClicked
-        ? [...this.files]
-        : this.detailsForm.controls['file'].value;
-      const prevFiles = this.detailsForm.controls['file'].value;
-      console.log('Preserved Files:', preservedFiles);
-      var updatedFiles: any[] = [];
-      var newFiles: any[] = [];
-      if (preservedFiles.length > 0) {
-        updatedFiles = [...preservedFiles, ...fileArray];
+        // Retrieve current files from the form
+        const currentFiles = this.detailsForm.get('file')?.value || [];
+
+        // Create a map to keep track of existing file names
+        const existingFileNames = new Set(
+          currentFiles.map((file: any) => file.name)
+        );
+
+        // Handle new files
+        selectedFiles.forEach((file) => {
+          const fileExtension = file.name.split('.').pop()?.toLowerCase();
+          const fileSize = file.size;
+
+          if (!allowedFormats.includes(fileExtension as string)) {
+            errors.push(`File ${file.name} is not in an allowed format.`);
+            return;
+          }
+
+          if (fileSize > maxSize) {
+            errors.push(`File ${file.name} exceeds the 5 MB size limit.`);
+            return;
+          }
+
+          if (existingFileNames.has(file.name)) {
+            errors.push(`File ${file.name} is a duplicate.`);
+            return;
+          }
+
+          // If no errors, process the file
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const fileData = reader.result as string;
+            this.files.push({
+              id: null, // New files won't have an ID
+              filename: file.name,
+              filedata: fileData,
+              clientDetailsId: this.editDetailsId, // Placeholder
+              blob: file, // Directly use the file object for preview
+            });
+            // Update form value with original file object
+            this.detailsForm.get('file')?.setValue([
+              ...this.detailsForm.get('file')?.value,
+              file, // Push the original file object
+            ]);
+          };
+          reader.readAsDataURL(file);
+        });
       } else {
-        updatedFiles = fileArray;
+        // When adding new files (not in edit mode)
+        const currentFiles = this.detailsForm.get('file')?.value || [];
+
+        // Create a map to keep track of existing file names
+        const fileNamesMap = new Set(
+          currentFiles.map((file: any) => file.name)
+        );
+
+        selectedFiles.forEach((file) => {
+          const fileExtension = file.name.split('.').pop()?.toLowerCase();
+          const fileSize = file.size;
+
+          if (!allowedFormats.includes(fileExtension as string)) {
+            errors.push(`File ${file.name} is not in an allowed format.`);
+            return;
+          }
+
+          if (fileSize > maxSize) {
+            errors.push(`File ${file.name} exceeds the 5 MB size limit.`);
+            return;
+          }
+
+          if (fileNamesMap.has(file.name)) {
+            errors.push(`File ${file.name} is a duplicate.`);
+            return;
+          }
+
+          // If no errors, process the file
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const fileData = reader.result as string;
+            const updatedFiles = [...currentFiles, file];
+            this.detailsForm.get('file')?.setValue(updatedFiles);
+            this.files = updatedFiles.map((file) => ({
+              ...file,
+              blob: file, // Keep original file for previewing
+            }));
+          };
+          reader.readAsDataURL(file);
+        });
       }
-      newFiles = [...prevFiles, ...fileArray];
-      console.log('New Files:', newFiles);
-      console.log('Updated Files:', updatedFiles);
 
-      this.detailsForm.get('file')?.setValue(newFiles);
-
-      this.files = updatedFiles.map((file, index) => {
-        return {
-          id:
-            this.isEditClicked && this.files[index]?.id !== undefined
-              ? this.files[index]?.id
-              : index, // Ensure unique IDs
-          filename: file.name,
-          blob: file, // Store Blob directly; it will be converted to File later if needed
-        };
-      });
-
-      console.log('Files:', this.files);
-    } else {
-      this.detailsForm.get('file')?.setValue([]);
-      this.files = [];
-      console.log('No files selected or files removed.');
+      // Display error messages if there are any
+      if (errors.length > 0) {
+        this.errorMessage = errors.join(' ');
+        console.log('Errors:', errors);
+      } else {
+        this.errorMessage = ''; // Clear errors if there are none
+      }
     }
   }
 
-  private convertBase64ToBlob(
+  convertBase64ToBlob(
     base64Data: string,
     contentType: string,
     fileName: string
   ): Blob {
-    const byteCharacters = atob(base64Data);
-    const byteArrays = [];
+    try {
+      // Remove any data URL prefix
+      const base64String = base64Data.startsWith('data:')
+        ? base64Data.split(',')[1]
+        : base64Data;
 
-    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-      const slice = byteCharacters.slice(offset, offset + 512);
-      const byteNumbers = new Array(slice.length);
-
-      for (let i = 0; i < slice.length; i++) {
-        byteNumbers[i] = slice.charCodeAt(i);
+      // Check if base64String is valid
+      if (!base64String || !base64String.trim()) {
+        throw new Error('Base64 string is missing or invalid');
       }
 
-      const byteArray = new Uint8Array(byteNumbers);
-      byteArrays.push(byteArray);
-    }
+      // Ensure the base64 string is a valid length
+      if (base64String.length % 4 !== 0) {
+        throw new Error('Base64 string length is incorrect');
+      }
 
-    var blob = new Blob(byteArrays, { type: contentType });
-    return new File([blob], fileName, { type: contentType });
+      // Decode base64 string to binary data
+      const byteCharacters = atob(base64String);
+      const byteNumbers = new Array(byteCharacters.length);
+
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+
+      // Convert binary data to Uint8Array
+      const byteArray = new Uint8Array(byteNumbers);
+
+      // Create and return a Blob
+      return new Blob([byteArray], { type: contentType });
+    } catch (error) {
+      console.error('Error converting base64 to Blob:', error);
+      return new Blob(); // or handle this error as needed
+    }
   }
 
   private getFileContentType(filename: string): string {
@@ -420,6 +455,7 @@ export class DetailsDialogComponent implements OnInit {
       case 'pdf':
         return 'application/pdf';
       case 'jpg':
+        return 'image/jpeg';
       case 'jpeg':
         return 'image/jpeg';
       case 'png':
@@ -451,31 +487,46 @@ export class DetailsDialogComponent implements OnInit {
     }
   }
 
-  deleteFile(fileId: number) {
-    // Find the file with the given ID in the files array
-    const fileToDelete = this.files.find((file) => file.id === fileId);
-    
-    // Remove the file from the local array regardless of its upload status
-    this.files = this.files.filter((file) => file.id !== fileId);
-    console.log('File removed locally');
-    if (fileToDelete && this.isEditClicked) {
-      this.fileService.deleteFile(fileId).subscribe(
-        () => {
-          this.files = this.files.filter((file) => file.id !== fileId);
-          console.log('File deleted successfully');
-          console.log('Files after deleting:', this.files);
-          if (this.files.length === 0) {
-            this.detailsForm.get('file')?.setValue([]);
-          }
-          this.errorMessage = null;
-        },
-        (error) => {
+  deleteFile(fileObj: any): void {
+    if (this.isEditClicked) {
+      const fileToDelete = this.files.find((file) => file === fileObj);
+      if (fileToDelete) {
+        // Remove file from form and preview
+        const updatedFiles = this.detailsForm
+          .get('file')
+          ?.value.filter((file: any) => file.name !== fileToDelete.blob.name);
+        this.detailsForm.get('file')?.setValue(updatedFiles);
+        this.files = this.files.filter((file) => file !== fileObj);
+        const isNewFile = this.newlyAddedFiles?.find(
+          (file) => file.name === fileToDelete.blob.name
+        );
+        if (!isNewFile) {
+          this.fileService.deleteFile(fileObj.id).subscribe(
+            (response) => {
+              this.toastr.success('File deleted successfully');
+            },
+            (error) => {
+              this.toastr.error('Error deleting file');
+            }
+          );
+        } else {
+          this.toastr.success('File deleted successfully');
         }
-      );
+      } else {
+        this.toastr.error('File not found');
+      }
     } else {
-      this.files = this.files.filter((file) => file.id !== fileId);
-      console.log('File removed locally');
-      this.errorMessage = null;
+      this.detailsForm.get('file')?.value;
+      const fileToDelete = this.files.find((file) => file === fileObj);
+      if (fileToDelete) {
+        // Remove file from form and preview
+        const updatedFiles = this.detailsForm
+          .get('file')
+          ?.value.filter((file: any) => file.name !== fileToDelete.blob.name);
+        this.detailsForm.get('file')?.setValue(updatedFiles);
+        this.files = this.files.filter((file) => file !== fileObj);
+        this.toastr.success('File deleted successfully');
+      }
     }
   }
 
@@ -491,19 +542,19 @@ export class DetailsDialogComponent implements OnInit {
       const stateIds = formValue.state.join(',');
 
       let clientDetails: ClientDetails = {
-        name: this.detailsForm.get('name')?.value,
-        email: this.detailsForm.get('email')?.value,
-        clientId: this.detailsForm.get('client')?.value,
+        name: formValue.name,
+        email: formValue.email,
+        clientId: formValue.client,
         stateId: stateIds,
         dob: formValue.dob,
         expStart: formValue.expStart,
         expEnd: formValue.expEnd,
-        payValue: this.detailsForm.get(
-          this.isStateChanged ? 'percentage' : 'hourlyRate'
-        )?.value,
+        payValue: this.isStateChanged
+          ? formValue.percentage
+          : formValue.hourlyRate,
         payType: this.payType,
-        gender: this.detailsForm.get('gender')?.value,
-        files: this.detailsForm.get('file')?.value,
+        gender: formValue.gender,
+        files: formValue.file,
       };
 
       const formData = new FormData();
@@ -548,6 +599,7 @@ export class DetailsDialogComponent implements OnInit {
                 this.dialog.closeAll();
               });
               this.editDetailsId = undefined;
+              this.newlyAddedFiles = [];
             },
             (error) => {
               this.toastr.error(error.error);

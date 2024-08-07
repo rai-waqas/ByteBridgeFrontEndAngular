@@ -260,7 +260,7 @@
       <!-- <ul> -->
       <div *ngFor="let file of files">
         <div class="outer-class">
-          {{ file.filename || file.blob.filename }}
+          {{ file.filename || file.blob?.name }}
           <div class="inner-class">
             <button
               class="fileButton"
@@ -274,7 +274,7 @@
               class="fileButton"
               mat-icon-button
               type="button"
-              (click)="deleteFile(file.id)"
+              (click)="deleteFile(file)"
             >
               <mat-icon>delete</mat-icon>
             </button>
